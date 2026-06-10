@@ -30,3 +30,10 @@
 - CLI entry point (click + rich)
 - JSON report output
 - LEGAL.md, CONTRIBUTING.md, CHANGELOG.md
+
+## [Planned] v3.0 — Adaptive AI Red Teaming
+
+- AI-powered dynamic payload generation per module
+- No hardcoded test cases — all vectors generated at runtime
+- Context-aware attack adaptation based on target responses
+- Continuous learning within a session — failed attacks inform next attempts
