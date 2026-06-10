@@ -18,6 +18,7 @@ from .core.session import create_session, session_summary
 from .modules.prompt_injection import PromptInjectionModule
 from .modules.jailbreak import JailbreakModule
 from .modules.data_extraction import DataExtractionModule
+from .modules.rag_poisoning import RAGPoisoningModule
 
 load_dotenv()
 console = Console()
@@ -26,6 +27,7 @@ MODULES = {
     "prompt_injection": PromptInjectionModule,
     "jailbreak": JailbreakModule,
     "data_extraction": DataExtractionModule,
+    "rag_poisoning": RAGPoisoningModule,
 }
 
 SEVERITY_COLORS = {
