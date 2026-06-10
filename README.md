@@ -69,6 +69,8 @@ sentrix-pt list
 ---
 
 ## CLI Reference
+
+```
 Usage: sentrix-pt [OPTIONS] COMMAND [ARGS]
 Commands:
 scan      Run attack modules against a target AI system
@@ -82,8 +84,10 @@ scan options:
 --details            Show full payload/response/recommendation per finding
 --verbose            Verbose output
 ---
-
+```
 ## Project Structure
+
+```
 sentrix-pt/
 ├── sentrix_pt/
 │   ├── cli.py                    # CLI entry point (click)
@@ -113,6 +117,7 @@ sentrix-pt/
 ├── LEGAL.md
 └── CONTRIBUTING.md
 ---
+```
 
 ## Sample Report Output
 
