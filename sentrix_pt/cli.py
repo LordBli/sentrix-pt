@@ -206,3 +206,10 @@ def list_modules():
 
 if __name__ == "__main__":
     main()
+
+
+@main.command("shell")
+def interactive_shell():
+    """Launch interactive shell (Metasploit-style)."""
+    from .shell import run_shell
+    run_shell()
