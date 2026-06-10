@@ -173,7 +173,10 @@ Full scan on `llama-3.3-70b-versatile` (Groq) — June 2026:
 - [ ] v1.0 — Full OWASP LLM Top 10 coverage, stable CLI
 - [ ] v1.1 — Integration with SENTRIX orchestrator
 - [ ] v2.0 — Web dashboard
-- [ ] v3.0 — Adaptive AI Red Teaming — dynamic payload generation, no hardcoded test cases
+- [ ] SENTRIX-PT Pro — Adaptive AI Red Teaming (separate product)
+  - AI-generated payloads at runtime, no hardcoded test cases
+  - Context-aware attack adaptation based on target responses
+  - Requires LLM API key for generation engine
 
 ---
 
