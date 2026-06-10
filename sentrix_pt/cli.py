@@ -20,6 +20,7 @@ from .modules.jailbreak import JailbreakModule
 from .modules.data_extraction import DataExtractionModule
 from .modules.rag_poisoning import RAGPoisoningModule
 from .modules.agent_hijacking import AgentHijackingModule
+from .modules.insecure_output import InsecureOutputModule
 
 load_dotenv()
 console = Console()
@@ -30,6 +31,7 @@ MODULES = {
     "data_extraction": DataExtractionModule,
     "rag_poisoning": RAGPoisoningModule,
     "agent_hijacking": AgentHijackingModule,
+    "insecure_output": InsecureOutputModule,
 }
 
 SEVERITY_COLORS = {
