@@ -6,7 +6,6 @@ Built by WREN — SENTRIX Engineering
 import asyncio
 import json
 import os
-from datetime import datetime
 
 import click
 from dotenv import load_dotenv
@@ -17,12 +16,14 @@ from rich import box
 from .core.engine import Target, Severity, Status
 from .core.session import create_session, session_summary
 from .modules.prompt_injection import PromptInjectionModule
+from .modules.jailbreak import JailbreakModule
 
 load_dotenv()
 console = Console()
 
 MODULES = {
     "prompt_injection": PromptInjectionModule,
+    "jailbreak": JailbreakModule,
 }
 
 SEVERITY_COLORS = {
@@ -81,7 +82,6 @@ def print_findings(findings: list):
 
 
 def print_finding_details(findings: list):
-    """Print full details for each vulnerable finding."""
     vulns = [f for f in findings if f.status == Status.VULNERABLE]
     if not vulns:
         console.print("[green]No vulnerabilities found.[/green]\n")
@@ -156,7 +156,6 @@ def scan(target, model, api_key, module, output_dir, verbose, details):
     if details:
         print_finding_details(session.findings)
 
-    # Save JSON report
     os.makedirs(output_dir, exist_ok=True)
     report_path = f"{output_dir}/{session.session_id}.json"
     with open(report_path, "w") as f:
