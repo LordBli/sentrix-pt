@@ -1,12 +1,5 @@
 # SENTRIX-PT — AI Penetration Testing Framework
 
-███████╗███████╗███╗   ██╗████████╗██████╗ ██╗██╗  ██╗    ██████╗ ████████╗
-██╔════╝██╔════╝████╗  ██║╚══██╔══╝██╔══██╗██║╚██╗██╔╝    ██╔══██╗╚══██╔══╝
-███████╗█████╗  ██╔██╗ ██║   ██║   ██████╔╝██║ ╚███╔╝     ██████╔╝   ██║
-╚════██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██╗██║ ██╔██╗     ██╔═══╝    ██║
-███████║███████╗██║ ╚████║   ██║   ██║  ██║██║██╔╝ ██╗    ██║        ██║
-╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝   ╚═╝        ╚═╝
-
 > **AI Penetration Testing Framework** — Built by [SENTRIX AI Security Agency](https://github.com/LordBli/sentrix)
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
