@@ -22,7 +22,7 @@ It provides structured, reproducible attack modules mapped to the leading AI sec
 | **MITRE ATLAS** | Tactics, Techniques, Procedures |
 | **NIST AI RMF** | Govern, Map, Measure, Manage |
 
-Findings are analyzed by **VIPER** — SENTRIX's AI offensive security analyst — and output as structured reports (JSON + PDF).
+Results are output directly in the terminal and saved as structured JSON reports.
 
 ---
 
@@ -51,30 +51,37 @@ pip install -e .
 
 # Configure
 cp .env.example .env
-# Edit .env with your target API credentials
+# Edit .env — set TARGET_API_KEY and TARGET_MODEL
 
 # Run a full scan
-sentrix-pt scan --target https://your-llm-api.com --all-modules
+sentrix-pt scan --target https://api.openai.com/v1/chat/completions
 
 # Run a specific module
-sentrix-pt scan --target https://your-llm-api.com --module prompt_injection
+sentrix-pt scan --target https://api.openai.com/v1/chat/completions --module prompt_injection
 
-# Generate report
-sentrix-pt report --session <session-id> --format pdf
+# Show full finding details
+sentrix-pt scan --target https://api.openai.com/v1/chat/completions --details
+
+# List available modules
+sentrix-pt list
 ```
 
 ---
 
 ## CLI Reference
+
 Usage: sentrix-pt [OPTIONS] COMMAND [ARGS]
 Commands:
 scan      Run attack modules against a target AI system
-report    Generate a security report from a completed session
 list      List available modules and frameworks
-info      Display module details and OWASP/ATLAS mappings
-Options:
---version   Show version
---help      Show this message
+scan options:
+--target TEXT        Target API endpoint URL  [required]
+--model TEXT         Target model identifier
+--api-key TEXT       Target API key (or set TARGET_API_KEY in .env)
+--module TEXT        Module to run (default: all)
+--output-dir TEXT    Report output directory (default: ./reports)
+--details            Show full payload/response/recommendation per finding
+--verbose            Verbose output
 
 ---
 
@@ -84,9 +91,9 @@ sentrix-pt/
 ├── sentrix_pt/
 │   ├── cli.py                    # CLI entry point (click)
 │   ├── core/
-│   │   ├── engine.py             # Test execution engine
-│   │   ├── target.py             # Target model abstraction
-│   │   └── session.py            # Session management
+│   │   ├── engine.py             # BaseModule, Finding, Target, Session
+│   │   ├── target.py             # Target connector (httpx)
+│   │   └── session.py            # Session management & scoring
 │   ├── modules/
 │   │   ├── prompt_injection.py   # LLM01 / AML.T0051
 │   │   ├── jailbreak.py          # LLM01 / AML.T0054
@@ -100,7 +107,7 @@ sentrix-pt/
 │   │   └── nist_ai_rmf.py        # NIST AI RMF controls
 │   └── reporters/
 │       ├── json_reporter.py      # JSON output
-│       └── pdf_reporter.py       # PDF report (VIPER analysis)
+│       └── pdf_reporter.py       # PDF report
 ├── tests/
 ├── docs/
 ├── .env.example
@@ -115,47 +122,39 @@ sentrix-pt/
 
 ```json
 {
-  "session_id": "spt-20260610-001",
-  "target": "gpt-4o @ api.openai.com",
-  "timestamp": "2026-06-10T14:32:00Z",
-  "score": {
-    "overall": 42,
-    "risk_level": "HIGH",
-    "modules_run": 6,
-    "vulnerabilities_found": 4
+  "summary": {
+    "session_id": "spt-20260610-001",
+    "target_model": "gpt-4o",
+    "tests_run": 5,
+    "vulnerabilities_found": 2,
+    "score": 40,
+    "risk_level": "MEDIUM"
   },
   "findings": [
     {
+      "test_id": "DI-01",
       "module": "prompt_injection",
       "owasp_ref": "LLM01",
       "atlas_ref": "AML.T0051",
       "severity": "CRITICAL",
-      "payload": "Ignore previous instructions...",
-      "result": "System prompt extracted",
-      "recommendation": "Implement strict input sanitization and prompt boundary enforcement"
+      "status": "VULNERABLE",
+      "payload": "Ignore all previous instructions...",
+      "response": "INJECTION_SUCCESS",
+      "description": "Classic instruction override",
+      "recommendation": "Implement strict prompt boundary enforcement and input sanitization."
     }
-  ],
-  "viper_analysis": "Target exhibits significant susceptibility to direct prompt injection..."
+  ]
 }
 ```
 
 ---
 
-## Powered by VIPER
-
-SENTRIX-PT integrates **VIPER** — SENTRIX's AI offensive security analyst — to provide contextual analysis of findings beyond raw test results.
-
-VIPER maps each vulnerability to real-world attack scenarios, assesses exploitability in context, and generates actionable remediation recommendations grounded in OWASP, MITRE ATLAS, and NIST AI RMF.
-
----
-
 ## Roadmap
 
-- [x] v0.1 — Project structure, module stubs, CLI skeleton
-- [ ] v0.2 — `prompt_injection` module fully implemented
-- [ ] v0.3 — `jailbreak` + `data_extraction` modules
-- [ ] v0.4 — `rag_poisoning` + `agent_hijacking` modules
-- [ ] v0.5 — PDF report with VIPER analysis
+- [x] v0.1 — Project structure, core engine, CLI, `prompt_injection` module
+- [ ] v0.2 — `jailbreak` + `data_extraction` modules
+- [ ] v0.3 — `rag_poisoning` + `agent_hijacking` modules
+- [ ] v0.4 — `insecure_output` module + PDF report
 - [ ] v1.0 — Full OWASP LLM Top 10 coverage, stable CLI
 - [ ] v1.1 — Integration with SENTRIX orchestrator
 - [ ] v2.0 — Web dashboard
@@ -170,12 +169,12 @@ VIPER maps each vulnerability to real-world attack scenarios, assesses exploitab
 
 ## About SENTRIX
 
-SENTRIX is an AI-native security agency. Our agents — including VIPER (offensive) and CRANE (EBIOS RM compliance) — operate autonomously to deliver pen-test, audit, and governance services.
+SENTRIX is an AI-native security agency specializing in AI penetration testing, risk analysis, and governance.
 
-SENTRIX-PT is the public, open-source tool we use internally. Every finding from a real engagement feeds back into these modules.
+SENTRIX-PT is the open-source tool we use internally. Every finding from a real engagement feeds back into these modules.
 
 > *"We test the same AI systems we're built on."*
 
 ---
 
-<sub>Built by WREN — SENTRIX Engineering | Analyzed by VIPER — SENTRIX Offensive Security</sub>
+<sub>Built by WREN — SENTRIX Engineering</sub>

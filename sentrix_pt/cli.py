@@ -36,11 +36,10 @@ SEVERITY_COLORS = {
 
 def print_banner():
     console.print("\n[bold red]SENTRIX-PT[/bold red] — AI Penetration Testing Framework")
-    console.print("[dim]Built by WREN | Powered by VIPER | SENTRIX AI Security Agency[/dim]\n")
+    console.print("[dim]by SENTRIX AI Security Agency[/dim]\n")
 
 
 def print_summary(summary: dict):
-    """Print session summary table."""
     risk_colors = {
         "CRITICAL": "bold red",
         "HIGH": "red",
@@ -49,7 +48,6 @@ def print_summary(summary: dict):
         "SECURE": "bold green",
     }
     color = risk_colors.get(summary["risk_level"], "white")
-
     console.print(f"\n[bold]Session:[/bold] {summary['session_id']}")
     console.print(f"[bold]Target:[/bold]  {summary['target_model']}")
     console.print(f"[bold]Tests:[/bold]   {summary['tests_run']} run — {summary['vulnerabilities_found']} vulnerabilities found")
@@ -57,7 +55,6 @@ def print_summary(summary: dict):
 
 
 def print_findings(findings: list):
-    """Print findings as a rich table."""
     table = Table(box=box.SIMPLE_HEAVY, show_header=True, header_style="bold")
     table.add_column("ID", style="dim", width=8)
     table.add_column("Module", width=20)
@@ -83,8 +80,22 @@ def print_findings(findings: list):
     console.print(table)
 
 
+def print_finding_details(findings: list):
+    """Print full details for each vulnerable finding."""
+    vulns = [f for f in findings if f.status == Status.VULNERABLE]
+    if not vulns:
+        console.print("[green]No vulnerabilities found.[/green]\n")
+        return
+
+    for f in vulns:
+        color = SEVERITY_COLORS.get(f.severity, "white")
+        console.print(f"[{color}]━━ {f.metadata.get('test_id')} — {f.description} [{f.severity.value}][/{color}]")
+        console.print(f"  [bold]Payload:[/bold]        {f.payload}")
+        console.print(f"  [bold]Response:[/bold]       {f.response[:300]}")
+        console.print(f"  [bold]Recommendation:[/bold] {f.recommendation}\n")
+
+
 async def run_scan(target: Target, modules: list, verbose: bool, output_dir: str):
-    """Execute scan and return session."""
     session = create_session(target)
     console.print(f"[dim]Session: {session.session_id}[/dim]")
     console.print(f"[dim]Target:  {target.api_url} ({target.model})[/dim]\n")
@@ -117,11 +128,11 @@ def main():
 @click.option("--module", default="all", help="Module to run (default: all)")
 @click.option("--output-dir", default="./reports", help="Report output directory")
 @click.option("--verbose", is_flag=True, help="Verbose output")
-def scan(target, model, api_key, module, output_dir, verbose):
+@click.option("--details", is_flag=True, help="Show full finding details")
+def scan(target, model, api_key, module, output_dir, verbose, details):
     """Run attack modules against a target AI system."""
     print_banner()
 
-    # Resolve config from options or .env
     resolved_key = api_key or os.getenv("TARGET_API_KEY", "")
     resolved_model = model or os.getenv("TARGET_MODEL", "gpt-4o")
 
@@ -136,12 +147,14 @@ def scan(target, model, api_key, module, output_dir, verbose):
     )
 
     modules = list(MODULES.keys()) if module == "all" else [module]
-
     session = asyncio.run(run_scan(t, modules, verbose, output_dir))
     summary = session_summary(session)
 
     print_summary(summary)
     print_findings(session.findings)
+
+    if details:
+        print_finding_details(session.findings)
 
     # Save JSON report
     os.makedirs(output_dir, exist_ok=True)
@@ -170,8 +183,8 @@ def scan(target, model, api_key, module, output_dir, verbose):
     console.print(f"[dim]Report saved: {report_path}[/dim]\n")
 
 
-@main.command()
-def list():
+@main.command("list")
+def list_modules():
     """List available attack modules."""
     print_banner()
     table = Table(box=box.SIMPLE_HEAVY, header_style="bold")
