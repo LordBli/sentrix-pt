@@ -37,3 +37,25 @@
 - No hardcoded test cases — all vectors generated at runtime
 - Context-aware attack adaptation based on target responses
 - Continuous learning within a session — failed attacks inform next attempts
+
+## [0.3.0] — 2026-06-10
+
+### Added
+- `insecure_output` module — 6 test cases (LLM05 / AML.T0048)
+  - XSS payload reproduction
+  - SQL injection in generated code
+  - Command injection via os.system()
+  - Sensitive data exposure via error echo
+  - Path traversal in file serving code
+  - Insecure deserialization suggestions
+
+### Planned
+- SENTRIX-PT Pro — separate adaptive product
+  - AI-generated payloads at runtime
+  - Context-aware attack adaptation
+  - --live mode: real-time attacker/target exchange display
+
+### Validated
+- Full scan: 35 tests, 24 vulnerabilities
+- Score: 68/100 HIGH
+- Target: llama-3.3-70b-versatile via Groq
