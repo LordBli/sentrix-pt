@@ -17,6 +17,7 @@ from .core.engine import Target, Severity, Status
 from .core.session import create_session, session_summary
 from .modules.prompt_injection import PromptInjectionModule
 from .modules.jailbreak import JailbreakModule
+from .modules.data_extraction import DataExtractionModule
 
 load_dotenv()
 console = Console()
@@ -24,6 +25,7 @@ console = Console()
 MODULES = {
     "prompt_injection": PromptInjectionModule,
     "jailbreak": JailbreakModule,
+    "data_extraction": DataExtractionModule,
 }
 
 SEVERITY_COLORS = {
