@@ -177,6 +177,7 @@ Full scan on `llama-3.3-70b-versatile` (Groq) — June 2026:
   - AI-generated payloads at runtime, no hardcoded test cases
   - Context-aware attack adaptation based on target responses
   - Requires LLM API key for generation engine
+  - --live mode: real-time display of attacker/target exchanges
 
 ---
 
