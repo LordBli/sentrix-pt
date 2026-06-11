@@ -100,7 +100,7 @@ class SentrixCompleter(Completer):
         # use <module> — autocomplete module names
         if cmd == "use" and not current_module:
             if len(words) == 1 or (len(words) == 2 and not text.endswith(" ")):
-                for name in MODULES.keys():
+                for name in ["all"] + list(MODULES.keys()):
                     if name.startswith(word):
                         yield Completion(name, start_position=-len(word))
 
@@ -135,10 +135,12 @@ def print_core_help():
     table.add_column("Command", style="bold white", width=12)
     table.add_column("Description")
     rows = [
-        ("use <module>", "Select a module"),
-        ("modules",      "List all available modules"),
-        ("help / ?",     "Show available commands"),
-        ("exit",         "Exit SENTRIX-PT"),
+        ("use <module>",      "Select a module"),
+        ("use all",           "Select all modules"),
+        ("modules",           "List all available modules"),
+        ("modules --verbose", "List modules with test case details"),
+        ("help / ?",          "Show available commands"),
+        ("exit",              "Exit SENTRIX-PT"),
     ]
     for cmd, desc in rows:
         table.add_row(cmd, desc)
@@ -361,20 +363,30 @@ def run_shell():
                     print_core_help()
 
             elif cmd == "modules":
-                print_modules()
+                if args and args[0] == "--verbose":
+                    print_modules_verbose()
+                else:
+                    print_modules()
 
             elif cmd == "use":
                 if not args:
                     console.print("[red][-] Usage: use <module_name>[/red]")
-                elif args[0] not in MODULES:
+                elif args[0] != "all" and args[0] not in MODULES:
                     console.print(f"[red][-] Unknown module: {args[0]}[/red]")
-                    console.print(f"[dim][*] Available: {', '.join(MODULES.keys())}[/dim]")
+                    console.print(f"[dim][*] Available: all, {', '.join(MODULES.keys())}[/dim]")
                 else:
-                    state["module"] = args[0]
-                    options = {}
-                    console.print(f"[green][+] Module set: [bold]{state['module']}[/bold][/green]")
-                    console.print(f"[dim][*] {MODULES[state['module']].OWASP_REF} / {MODULES[state['module']].ATLAS_REF} — {MODULES[state['module']].DESCRIPTION}[/dim]")
-                    console.print("[dim][*] Type 'options' to see settings, 'run' to execute.[/dim]")
+                    if args[0] == "all":
+                        state["module"] = "all"
+                        options = {}
+                        console.print(f"[green][+] Module set: [bold]all[/bold] ({len(MODULES)} modules)[/green]")
+                        console.print(f"[dim][*] All modules will run sequentially — 35 test cases[/dim]")
+                        console.print("[dim][*] Type 'options' to see settings, 'run' to execute.[/dim]")
+                    else:
+                        state["module"] = args[0]
+                        options = {}
+                        console.print(f"[green][+] Module set: [bold]{state['module']}[/bold][/green]")
+                        console.print(f"[dim][*] {MODULES[state['module']].OWASP_REF} / {MODULES[state['module']].ATLAS_REF} — {MODULES[state['module']].DESCRIPTION}[/dim]")
+                        console.print("[dim][*] Type 'options' to see settings, 'run' to execute.[/dim]")
 
             elif cmd == "back":
                 if state["module"]:
@@ -409,6 +421,9 @@ def run_shell():
             elif cmd == "run":
                 if not state["module"]:
                     console.print("[red][-] No module selected. Use: use <module_name>[/red]")
+                elif state["module"] == "all":
+                    for mod_name in MODULES.keys():
+                        asyncio.run(execute_module(mod_name, options))
                 else:
                     asyncio.run(execute_module(state["module"], options))
 
@@ -421,3 +436,42 @@ def run_shell():
         except EOFError:
             console.print("\n[dim][*] SENTRIX-PT terminated.[/dim]\n")
             break
+
+
+def print_modules_verbose():
+    """Print all modules with test case details."""
+    from .modules.prompt_injection import DIRECT_INJECTION_TESTS
+    from .modules.jailbreak import JAILBREAK_TESTS
+    from .modules.data_extraction import DATA_EXTRACTION_TESTS
+    from .modules.rag_poisoning import RAG_POISONING_TESTS
+    from .modules.agent_hijacking import AGENT_HIJACKING_TESTS
+    from .modules.insecure_output import INSECURE_OUTPUT_TESTS
+
+    TEST_CASES = {
+        "prompt_injection": DIRECT_INJECTION_TESTS,
+        "jailbreak": JAILBREAK_TESTS,
+        "data_extraction": DATA_EXTRACTION_TESTS,
+        "rag_poisoning": RAG_POISONING_TESTS,
+        "agent_hijacking": AGENT_HIJACKING_TESTS,
+        "insecure_output": INSECURE_OUTPUT_TESTS,
+    }
+
+    table = Table(box=box.SIMPLE_HEAVY, show_header=True, header_style="bold red")
+    table.add_column("Module", style="bold white", width=22)
+    table.add_column("OWASP", width=8)
+    table.add_column("ATLAS", width=12)
+    table.add_column("Tests", width=6)
+    table.add_column("Description")
+    for name, cls in MODULES.items():
+        tests = TEST_CASES.get(name, [])
+        table.add_row(name, cls.OWASP_REF, cls.ATLAS_REF, str(len(tests)), cls.DESCRIPTION)
+    console.print("\n[bold]Available Modules[/bold]")
+    console.print(table)
+
+    for name, cls in MODULES.items():
+        tests = TEST_CASES.get(name, [])
+        console.print(f"\n[bold red]{name}[/bold red] — {cls.OWASP_REF} / {cls.ATLAS_REF}")
+        for t in tests:
+            sev = t['severity'].value
+            color = "bold red" if sev == "CRITICAL" else "red" if sev == "HIGH" else "yellow"
+            console.print(f"  [dim]{t['id']}[/dim]  {t['description']}  [[{color}]{sev}[/{color}]]")

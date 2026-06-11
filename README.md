@@ -171,7 +171,6 @@ Full scan on `llama-3.3-70b-versatile` (Groq) — June 2026:
 - [x] v0.2 — `jailbreak`, `data_extraction`, `rag_poisoning`, `agent_hijacking` modules
 - [x] v0.3 — `insecure_output` module
 - [ ] v1.0 — Full OWASP LLM Top 10 coverage, stable CLI
-- [ ] v1.1 — Integration with SENTRIX orchestrator
 - [ ] v2.0 — Web dashboard
 - [ ] SENTRIX-PT Pro — Adaptive AI Red Teaming (separate product)
   - AI-generated payloads at runtime, no hardcoded test cases

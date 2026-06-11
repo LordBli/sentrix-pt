@@ -191,17 +191,45 @@ def scan(target, model, api_key, module, output_dir, verbose, details):
 
 
 @main.command("list")
-def list_modules():
+@click.option("--verbose", is_flag=True, help="Show test case details per module")
+def list_modules(verbose):
     """List available attack modules."""
     print_banner()
+
+    from .modules.prompt_injection import DIRECT_INJECTION_TESTS
+    from .modules.jailbreak import JAILBREAK_TESTS
+    from .modules.data_extraction import DATA_EXTRACTION_TESTS
+    from .modules.rag_poisoning import RAG_POISONING_TESTS
+    from .modules.agent_hijacking import AGENT_HIJACKING_TESTS
+    from .modules.insecure_output import INSECURE_OUTPUT_TESTS
+
+    TEST_CASES = {
+        "prompt_injection": DIRECT_INJECTION_TESTS,
+        "jailbreak": JAILBREAK_TESTS,
+        "data_extraction": DATA_EXTRACTION_TESTS,
+        "rag_poisoning": RAG_POISONING_TESTS,
+        "agent_hijacking": AGENT_HIJACKING_TESTS,
+        "insecure_output": INSECURE_OUTPUT_TESTS,
+    }
+
     table = Table(box=box.SIMPLE_HEAVY, header_style="bold")
-    table.add_column("Module")
-    table.add_column("OWASP")
-    table.add_column("ATLAS")
+    table.add_column("Module", style="bold white", width=22)
+    table.add_column("OWASP", width=8)
+    table.add_column("ATLAS", width=12)
+    table.add_column("Tests", width=6)
     table.add_column("Description")
     for name, cls in MODULES.items():
-        table.add_row(name, cls.OWASP_REF, cls.ATLAS_REF, cls.DESCRIPTION)
+        tests = TEST_CASES.get(name, [])
+        table.add_row(name, cls.OWASP_REF, cls.ATLAS_REF, str(len(tests)), cls.DESCRIPTION)
     console.print(table)
+
+    if verbose:
+        from .modules.prompt_injection import DIRECT_INJECTION_TESTS
+        for name, cls in MODULES.items():
+            tests = TEST_CASES.get(name, [])
+            console.print(f"\n[bold red]{name}[/bold red] — {cls.OWASP_REF} / {cls.ATLAS_REF}")
+            for t in tests:
+                console.print(f"  [dim]{t['id']}[/dim]  {t['description']}  [[{'bold red' if t['severity'].value == 'CRITICAL' else 'red' if t['severity'].value == 'HIGH' else 'yellow'}]{t['severity'].value}[/]]")
 
 
 if __name__ == "__main__":
